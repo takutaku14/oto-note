@@ -21,7 +21,8 @@ export default defineConfig({
         background_color: '#F2F2F7',
         display: 'standalone',
         orientation: 'portrait',
-        start_url: '/',
+        start_url: '/oto-note/',
+        scope: '/oto-note/',
         icons: [
           {
             src: 'favicon.svg',
