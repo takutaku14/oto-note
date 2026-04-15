@@ -6,6 +6,7 @@
  * 特徴:
  * - 団体カラーバッジ（どの団体の予定か一目で識別）
  * - カテゴリアイコン + テーマカラー
+ * - 未回答バッジ（要回答イベントのハイライト）
  * - タップ時の active:scale フィードバック
  */
 
@@ -19,8 +20,12 @@ type EventCardProps = {
   orgName?: string
   /** 団体カラー（タイムラインのバッジ表示用） */
   orgColor?: string
+  /** 回答ステータス（未回答なら 'unanswered' or undefined で赤バッジ表示） */
+  responseStatus?: string
   /** クリックハンドラ */
   onClick?: () => void
+  /** カスタムクラス */
+  className?: string
 }
 
 /**
@@ -41,27 +46,40 @@ const getDateDisplay = (event: AppEvent): string => {
   }
 }
 
+/** 未回答かどうかを判定 */
+const isUnanswered = (status?: string): boolean =>
+  !status || status === 'unanswered' || status === 'unpaid'
+
 export const EventCard: React.FC<EventCardProps> = ({
   event,
   orgName,
   orgColor,
+  responseStatus,
   onClick,
+  className = '',
 }) => {
   const meta = EVENT_CATEGORY_META[event.category]
   const dateText = getDateDisplay(event)
+  const needsAction = isUnanswered(responseStatus)
 
   return (
     <button
       onClick={onClick}
-      className="w-full text-left bg-background-grouped-secondary rounded-xl p-4 active:scale-[0.98] transition-transform duration-150 ease-apple-ease shadow-sm"
+      className={`w-full text-left bg-background-grouped-secondary rounded-xl p-4 active:scale-[0.98] transition-transform duration-150 ease-apple-ease shadow-sm ${className}`}
     >
       <div className="flex items-start gap-3">
         {/* カテゴリアイコン */}
-        <div
-          className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl"
-          style={{ backgroundColor: meta.color + '18' }}
-        >
-          <meta.Icon className="h-5 w-5" style={{ color: meta.color }} />
+        <div className="relative">
+          <div
+            className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl"
+            style={{ backgroundColor: meta.color + '18' }}
+          >
+            <meta.Icon className="h-5 w-5" style={{ color: meta.color }} />
+          </div>
+          {/* 未回答ドット */}
+          {needsAction && responseStatus !== undefined && (
+            <div className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-red-500 border-2 border-background-grouped-secondary" />
+          )}
         </div>
 
         {/* コンテンツ */}
@@ -77,8 +95,15 @@ export const EventCard: React.FC<EventCardProps> = ({
             </div>
           )}
 
-          {/* イベントタイトル */}
-          <h3 className="text-headline text-label line-clamp-1">{event.title}</h3>
+          {/* イベントタイトル + 要回答バッジ */}
+          <div className="flex items-center gap-2">
+            <h3 className="text-headline text-label line-clamp-1">{event.title}</h3>
+            {needsAction && responseStatus !== undefined && (
+              <span className="flex-shrink-0 px-1.5 py-0.5 rounded bg-red-100 dark:bg-red-900/50 text-caption-2 font-medium text-red-600 dark:text-red-400">
+                要回答
+              </span>
+            )}
+          </div>
 
           {/* 日付・期限 */}
           {dateText && (
@@ -96,3 +121,4 @@ export const EventCard: React.FC<EventCardProps> = ({
     </button>
   )
 }
+

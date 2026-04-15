@@ -3,10 +3,11 @@
  *
  * Phase 0 で定義したモックデータを useState で管理し、
  * 読み書きメソッドを提供する疑似データベース層。
+ * Phase 2 にて localStorage への永続化とリセット機能を追加。
  * Phase 6 で Firestore に置き換え予定。
  */
 
-import { createContext, useState, useCallback } from 'react'
+import { createContext, useState, useCallback, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import type { Organization, Season, Membership, AppEvent, EventResponse, Board, Comment, Notification } from '../types'
 import {
@@ -19,6 +20,19 @@ import {
   mockComments,
   mockNotifications,
 } from '../mocks'
+
+const STORAGE_KEY = 'oto-note-mock-data'
+
+type StoredData = {
+  organizations: Organization[]
+  seasons: Season[]
+  memberships: Membership[]
+  events: AppEvent[]
+  responses: EventResponse[]
+  boards: Board[]
+  comments: Comment[]
+  notifications: Notification[]
+}
 
 /** MockDataContext が提供する型 */
 export type MockDataContextValue = {
@@ -43,27 +57,69 @@ export type MockDataContextValue = {
   addMembership: (membership: Membership) => void
   updateMembership: (userId: string, orgId: string, updates: Partial<Membership>) => void
 
-  /* ====== イベント操作（Phase 2 で拡張） ====== */
+  /* ====== イベント操作 ====== */
   addEvent: (event: AppEvent) => void
 
-  /* ====== レスポンス操作（Phase 3 で拡張） ====== */
+  /* ====== レスポンス操作 ====== */
   updateResponse: (eventId: string, userId: string, updates: Partial<EventResponse>) => void
 
   /* ====== 通知操作 ====== */
   markNotificationRead: (notifId: string) => void
+
+  /* ====== 管理操作 ====== */
+  resetAllData: () => void
 }
 
 export const MockDataContext = createContext<MockDataContextValue | null>(null)
 
 export const MockDataProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [organizations, setOrganizations] = useState<Organization[]>(mockOrganizations)
-  const [seasons, setSeasons] = useState<Season[]>(mockSeasons)
-  const [memberships, setMemberships] = useState<Membership[]>(mockMemberships)
-  const [events, setEvents] = useState<AppEvent[]>(mockEvents)
-  const [responses, setResponses] = useState<EventResponse[]>(mockResponses)
-  const [boards] = useState<Board[]>(mockBoards)
-  const [comments] = useState<Comment[]>(mockComments)
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications)
+  // 初期化時に localStorage を確認
+  const getInitialData = (): StoredData => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY)
+      if (stored) {
+        return JSON.parse(stored)
+      }
+    } catch (e) {
+      console.error('Failed to parse mock data from localStorage', e)
+    }
+    return {
+      organizations: mockOrganizations,
+      seasons: mockSeasons,
+      memberships: mockMemberships,
+      events: mockEvents,
+      responses: mockResponses,
+      boards: mockBoards,
+      comments: mockComments,
+      notifications: mockNotifications,
+    }
+  }
+
+  const initialData = getInitialData()
+
+  const [organizations, setOrganizations] = useState<Organization[]>(initialData.organizations)
+  const [seasons, setSeasons] = useState<Season[]>(initialData.seasons)
+  const [memberships, setMemberships] = useState<Membership[]>(initialData.memberships)
+  const [events, setEvents] = useState<AppEvent[]>(initialData.events)
+  const [responses, setResponses] = useState<EventResponse[]>(initialData.responses)
+  const [boards, setBoards] = useState<Board[]>(initialData.boards)
+  const [comments, setComments] = useState<Comment[]>(initialData.comments)
+  const [notifications, setNotifications] = useState<Notification[]>(initialData.notifications)
+
+  // データが更新されるたびに localStorage に保存
+  useEffect(() => {
+    const dataToStore: StoredData = {
+      organizations,
+      seasons,
+      memberships,
+      events,
+      responses,
+      boards,
+      comments,
+      notifications,
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToStore))
+  }, [organizations, seasons, memberships, events, responses, boards, comments, notifications])
 
   /* ====== 団体操作 ====== */
   const addOrganization = useCallback((org: Organization) => {
@@ -115,6 +171,19 @@ export const MockDataProvider: React.FC<{ children: ReactNode }> = ({ children }
     )
   }, [])
 
+  /* ====== 管理操作 ====== */
+  const resetAllData = useCallback(() => {
+    setOrganizations(mockOrganizations)
+    setSeasons(mockSeasons)
+    setMemberships(mockMemberships)
+    setEvents(mockEvents)
+    setResponses(mockResponses)
+    setBoards(mockBoards)
+    setComments(mockComments)
+    setNotifications(mockNotifications)
+    localStorage.removeItem(STORAGE_KEY)
+  }, [])
+
   const value: MockDataContextValue = {
     organizations, seasons, memberships, events, responses, boards, comments, notifications,
     addOrganization, updateOrganization,
@@ -123,7 +192,9 @@ export const MockDataProvider: React.FC<{ children: ReactNode }> = ({ children }
     addEvent,
     updateResponse,
     markNotificationRead,
+    resetAllData,
   }
 
   return <MockDataContext.Provider value={value}>{children}</MockDataContext.Provider>
 }
+

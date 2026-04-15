@@ -7,7 +7,6 @@ import { useState, useEffect } from 'react'
 import { AlertTriangle, Plus, X } from 'lucide-react'
 import { HalfModalSheet } from '../../components/ui/HalfModalSheet'
 import { ActionButton } from '../../components/ui/ActionButton'
-import { Badge } from '../../components/ui/Badge'
 import { useMembers } from '../../hooks/useMembers'
 import type { Membership, MemberStatus, MemberRole } from '../../types'
 

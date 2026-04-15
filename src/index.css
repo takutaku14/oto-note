@@ -113,3 +113,175 @@
     width: 100%;
   }
 }
+
+@layer components {
+  /* ========================================
+   * Vertical Timeline (CD-Timeline inspired)
+   * ======================================== */
+  .vertical-timeline {
+    position: relative;
+    padding: 2rem 0;
+  }
+  
+  /* 垂直な軸線 (Mobile: 左端寄り, PC: 中央) */
+  .vertical-timeline::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 24px; /* スマホ時の左からの余白（アイコンの幅40pxの半分の位置+余白） */
+    height: 100%;
+    width: 4px;
+    background-color: var(--color-system-fill);
+    border-radius: 2px;
+  }
+  
+  @media (min-width: 768px) {
+    .vertical-timeline::before {
+      left: 50%;
+      transform: translateX(-50%);
+    }
+  }
+
+  /* 吹き出しの三角形（ポインター） */
+  .timeline-card-pointer {
+    position: relative;
+  }
+  
+  /* 右側に表示されるカード用の左向き三角形（モバイルの全カード、PCの右側カード） */
+  .timeline-card-pointer.is-right::before {
+    content: '';
+    position: absolute;
+    top: 18px;
+    right: 100%;
+    width: 0;
+    height: 0;
+    border: 8px solid transparent;
+    border-right-color: rgb(var(--color-secondary-system-grouped-background));
+  }
+
+  /* PC幅で、左側に表示されるカード用の右向き三角形 */
+  @media (min-width: 768px) {
+    .timeline-card-pointer.is-left::before {
+      content: '';
+      position: absolute;
+      top: 18px;
+      right: auto;
+      left: 100%;
+      width: 0;
+      height: 0;
+      border: 8px solid transparent;
+      border-left-color: rgb(var(--color-secondary-system-grouped-background));
+    }
+  }
+
+  /* ========================================
+   * アニメーション (IntersectionObserver連動)
+   * ======================================== */
+  
+  /* 初期状態は非表示＋少し縮小（アイコン）またはずらす（カード） */
+  .timeline-hidden {
+    opacity: 0;
+    visibility: hidden;
+  }
+  
+  .timeline-icon-hidden {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+
+  .timeline-content-hidden {
+    opacity: 0;
+    transform: translateY(20px); /* モバイルでは下から上がる */
+  }
+
+  @media (min-width: 768px) {
+    .timeline-content-hidden.is-right {
+      transform: translateX(100px); /* 右側カードは右からスライドイン */
+    }
+    .timeline-content-hidden.is-left {
+      transform: translateX(-100px); /* 左側カードは左からスライドイン */
+    }
+  }
+
+  /* 表示されたときのアニメーションクラス */
+  .timeline-icon-bounce-in {
+    opacity: 1;
+    visibility: visible;
+    animation: cd-bounce-1 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .timeline-content-bounce-in {
+    opacity: 1;
+    visibility: visible;
+    animation: cd-bounce-2 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  @media (min-width: 768px) {
+    .timeline-content-bounce-in.is-left {
+      animation-name: cd-bounce-2-inverse;
+    }
+  }
+
+  @keyframes cd-bounce-1 {
+    0% {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+    60% {
+      opacity: 1;
+      transform: scale(1.2);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes cd-bounce-2 {
+    0% {
+      opacity: 0;
+      transform: translateX(100px);
+    }
+    60% {
+      opacity: 1;
+      transform: translateX(-10px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes cd-bounce-2-inverse {
+    0% {
+      opacity: 0;
+      transform: translateX(-100px);
+    }
+    60% {
+      opacity: 1;
+      transform: translateX(10px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  /* モバイル用の下からのスライドアニメーション */
+  @media (max-width: 767px) {
+    @keyframes cd-bounce-2 {
+      0% {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      60% {
+        opacity: 1;
+        transform: translateY(-5px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  }
+}
