@@ -8,7 +8,7 @@ import { MockDataProvider } from './contexts/MockDataContext'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename="/oto-note/">
       <AuthProvider>
         <MockDataProvider>
           <App />

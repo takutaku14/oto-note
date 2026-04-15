@@ -15,6 +15,26 @@ import { SeasonSwitcher } from '../../components/ui/SeasonSwitcher'
 import { VerticalTimeline } from '../../components/ui/timeline/VerticalTimeline'
 import { TimelineBlock } from '../../components/ui/timeline/TimelineBlock'
 import { EVENT_CATEGORY_META, getEventDirection } from '../../constants/eventCategories'
+import type { AppEvent } from '../../types'
+
+/** タイムラインの横に表示する日付・時刻を取得 */
+const getTimelineDateContent = (event: AppEvent): string => {
+  switch (event.category) {
+    case 'practice':
+    case 'section':
+      return event.timetable[0]?.startTime || event.date
+    case 'duty':
+      return event.date
+    case 'billing':
+    case 'survey':
+    case 'return':
+      return event.dueDate
+    case 'notice':
+      return event.dueDate || ''
+    default:
+      return ''
+  }
+}
 
 export const OrgDashboardPage: React.FC = () => {
   const { org, season, isAdmin } = useCurrentOrg()
@@ -25,7 +45,7 @@ export const OrgDashboardPage: React.FC = () => {
   return (
     <div className="min-h-full bg-background-grouped pb-[env(safe-area-inset-bottom)]">
       {/* ヘッダー */}
-      <div className="sticky top-0 z-10 bg-background-grouped/80 backdrop-blur-xl border-b border-separator">
+      <div className="sticky top-0 z-40 bg-background-grouped/80 backdrop-blur-xl border-b border-separator">
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex-1 min-w-0">
             <h1 className="text-title-2 font-bold text-label truncate">{org.name}</h1>
@@ -81,11 +101,14 @@ export const OrgDashboardPage: React.FC = () => {
             {upcomingEvents.length > 0 && (
               <>
                 <div className="relative flex items-center md:justify-center z-10 mb-6 pl-2 md:pl-0">
+                  <div className="absolute inset-0 flex items-center justify-center -z-10">
+                    <div className="w-full h-full bg-background-grouped" />
+                  </div>
                   <span className="bg-tint/10 text-tint px-4 py-1.5 rounded-full text-caption-1 font-bold shadow-sm">
                     今後の予定（{upcomingEvents.length}件）
                   </span>
                 </div>
-                {upcomingEvents.map((event, idx) => {
+                {upcomingEvents.map((event) => {
                   const meta = EVENT_CATEGORY_META[event.category]
                   const response = getMyResponse(event.id)
                   return (
@@ -93,7 +116,7 @@ export const OrgDashboardPage: React.FC = () => {
                       key={event.id}
                       icon={<meta.Icon className="h-5 w-5" />}
                       iconBgColor={meta.color}
-                      dateContent={event.time || event.date}
+                      dateContent={getTimelineDateContent(event)}
                       direction={getEventDirection(event.category)}
                     >
                       <EventCard
@@ -111,20 +134,22 @@ export const OrgDashboardPage: React.FC = () => {
             {pastEvents.length > 0 && (
               <>
                 <div className="relative flex items-center md:justify-center z-10 mb-6 pl-2 md:pl-0 mt-8">
+                  <div className="absolute inset-0 flex items-center justify-center -z-10">
+                    <div className="w-full h-full bg-background-grouped" />
+                  </div>
                   <span className="bg-fill px-4 py-1.5 rounded-full text-caption-1 font-bold text-label-secondary shadow-sm">
                     過去のイベント（{pastEvents.length}件）
                   </span>
                 </div>
-                {pastEvents.map((event, idx) => {
+                {pastEvents.map((event) => {
                   const meta = EVENT_CATEGORY_META[event.category]
                   const response = getMyResponse(event.id)
-                  const globalIdx = upcomingEvents.length + idx
                   return (
                     <TimelineBlock
                       key={event.id}
                       icon={<meta.Icon className="h-5 w-5" />}
                       iconBgColor={meta.color}
-                      dateContent={event.time || event.date}
+                      dateContent={getTimelineDateContent(event)}
                       direction={getEventDirection(event.category)}
                     >
                       <div className="opacity-60 transition-opacity hover:opacity-100">

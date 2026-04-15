@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useRef, useState } from 'react'
+import { type ReactNode, useEffect, useRef, useState } from 'react'
 
 export type TimelineBlockProps = {
   /** 丸いアイコンコンテナの中に表示するアイコン */

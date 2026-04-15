@@ -8,6 +8,7 @@
  */
 
 import type { ReactNode } from 'react'
+import { Loader2 } from 'lucide-react'
 
 type ActionButtonProps = {
   /** ボタンのラベルテキスト */
@@ -22,6 +23,8 @@ type ActionButtonProps = {
   fullWidth?: boolean
   /** 無効化状態 */
   disabled?: boolean
+  /** ロード中状態 */
+  isLoading?: boolean
   /** 左アイコン（任意） */
   icon?: ReactNode
 }
@@ -47,12 +50,13 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
   size = 'md',
   fullWidth = false,
   disabled = false,
+  isLoading = false,
   icon,
 }) => {
   return (
     <button
       onClick={onClick}
-      disabled={disabled}
+      disabled={disabled || isLoading}
       className={`
         inline-flex items-center justify-center gap-2 rounded-xl font-semibold
         active:scale-95 transition-transform duration-150 ease-apple-spring
@@ -62,7 +66,11 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
         ${fullWidth ? 'w-full' : ''}
       `}
     >
-      {icon}
+      {isLoading ? (
+        <Loader2 className="w-5 h-5 animate-spin" />
+      ) : (
+        icon
+      )}
       {label}
     </button>
   )

@@ -4,7 +4,7 @@
  */
 
 import { useNavigate } from 'react-router-dom'
-import { Bell, CheckCircle2, ChevronRight, AlertCircle, CalendarClock, CreditCard, UserPlus } from 'lucide-react'
+import { Bell, CheckCircle2, ChevronRight, AlertCircle, CalendarClock, UserPlus } from 'lucide-react'
 import { useNotifications } from '../../hooks/useNotifications'
 import { useOrganizations } from '../../hooks/useOrganizations'
 import { EmptyState } from '../../components/ui/EmptyState'

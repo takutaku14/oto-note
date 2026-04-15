@@ -12,12 +12,32 @@ import { useTimeline } from '../../hooks/useTimeline'
 import { useNotifications } from '../../hooks/useNotifications'
 import { useOrganizations } from '../../hooks/useOrganizations'
 import { useMockData } from '../../hooks/useMockData'
-import { CountdownBanner } from '../../components/ui/CountdownBanner'
+import { CountdownCarousel } from '../../components/ui/CountdownCarousel'
 import { EventCard } from '../../components/ui/EventCard'
 import { EmptyState } from '../../components/ui/EmptyState'
 import { VerticalTimeline } from '../../components/ui/timeline/VerticalTimeline'
 import { TimelineBlock } from '../../components/ui/timeline/TimelineBlock'
 import { EVENT_CATEGORY_META, getEventDirection } from '../../constants/eventCategories'
+import type { AppEvent } from '../../types'
+
+/** タイムラインの横に表示する日付・時刻を取得 */
+const getTimelineDateContent = (event: AppEvent): string => {
+  switch (event.category) {
+    case 'practice':
+    case 'section':
+      return event.timetable[0]?.startTime || event.date
+    case 'duty':
+      return event.date
+    case 'billing':
+    case 'survey':
+    case 'return':
+      return event.dueDate
+    case 'notice':
+      return event.dueDate || ''
+    default:
+      return ''
+  }
+}
 
 /** 日付文字列を曜日付きで表示 */
 const formatDateHeader = (dateStr: string): string => {
@@ -47,23 +67,37 @@ export const HomePage: React.FC = () => {
   const navigate = useNavigate()
   const [showUnansweredOnly, setShowUnansweredOnly] = useState(false)
 
-  // 最も近い本番日のカウントダウン
-  const upcomingConcert = useMemo(() => {
+  // 全団体の本番日のカウントダウンを集計
+  const upcomingConcerts = useMemo(() => {
     const now = new Date()
-    let nearest: { seasonTitle: string; concertDate: string } | null = null
-    let minDiff = Infinity
+    const concerts: {
+      orgName: string
+      orgColor: string
+      seasonTitle: string
+      concertDate: string
+      diff: number
+    }[] = []
 
     for (const org of organizations) {
       if (!org.currentSeasonId) continue
       const season = data.seasons.find((s) => s.id === org.currentSeasonId)
       if (!season?.concertDate) continue
       const diff = new Date(season.concertDate).getTime() - now.getTime()
-      if (diff > 0 && diff < minDiff) {
-        minDiff = diff
-        nearest = { seasonTitle: season.title, concertDate: season.concertDate }
+      
+      // 本番当日またはそれ以降のもののみ追加
+      if (diff > -(1000 * 60 * 60 * 24)) {
+        concerts.push({
+          orgName: org.name,
+          orgColor: org.color || '',
+          seasonTitle: season.title,
+          concertDate: season.concertDate,
+          diff,
+        })
       }
     }
-    return nearest
+
+    // 日付が近い順にソート
+    return concerts.sort((a, b) => a.diff - b.diff)
   }, [organizations, data.seasons])
 
   // フィルタ適用後のグルーピング
@@ -84,7 +118,7 @@ export const HomePage: React.FC = () => {
   return (
     <div className="min-h-full bg-background-grouped pb-[env(safe-area-inset-bottom)]">
       {/* ヘッダー */}
-      <div className="sticky top-0 z-10 bg-background-grouped/80 backdrop-blur-xl border-b border-separator">
+      <div className="sticky top-0 z-40 bg-background-grouped/80 backdrop-blur-xl border-b border-separator">
         <div className="flex items-center justify-between px-4 py-3">
           <div>
             <p className="text-subhead text-label-secondary">おかえりなさい</p>
@@ -129,13 +163,10 @@ export const HomePage: React.FC = () => {
         )}
       </div>
 
-      {/* カウントダウンバナー */}
-      {upcomingConcert && (
-        <div className="pt-4">
-          <CountdownBanner
-            seasonTitle={upcomingConcert.seasonTitle}
-            concertDate={upcomingConcert.concertDate}
-          />
+      {/* カウントダウン・カルーセル */}
+      {upcomingConcerts.length > 0 && (
+        <div className="pt-4 overflow-hidden">
+          <CountdownCarousel items={upcomingConcerts} />
         </div>
       )}
 
@@ -152,20 +183,23 @@ export const HomePage: React.FC = () => {
               <div key={dateKey}>
                 {/* 日付セクションバッジ（軸上に配置） */}
                 <div className="relative flex items-center md:justify-center z-10 mb-6 pl-2 md:pl-0">
+                  <div className="absolute inset-0 flex items-center justify-center -z-10">
+                    <div className="w-full h-full bg-background-grouped" />
+                  </div>
                   <span className="bg-background-grouped-secondary px-4 py-1.5 rounded-full text-caption-1 font-bold text-label-secondary shadow-sm">
                     {formatDateHeader(dateKey)}
                   </span>
                 </div>
 
                 {/* イベントカードリスト */}
-                {filteredGrouped[dateKey].map((te, idx) => {
+                {filteredGrouped[dateKey].map((te) => {
                   const meta = EVENT_CATEGORY_META[te.event.category]
                   return (
                     <TimelineBlock
                       key={te.event.id}
                       icon={<meta.Icon className="h-5 w-5" />}
                       iconBgColor={meta.color}
-                      dateContent={te.event.time || te.event.date}
+                      dateContent={getTimelineDateContent(te.event)}
                       direction={getEventDirection(te.event.category)}
                     >
                       <EventCard

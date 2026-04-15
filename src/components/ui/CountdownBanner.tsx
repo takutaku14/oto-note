@@ -7,15 +7,24 @@
 import { Calendar } from 'lucide-react'
 
 type CountdownBannerProps = {
+  /** 団体名 */
+  orgName?: string
+  /** 団体のテーマカラー */
+  orgColor?: string
   /** シーズン名（例：「第10回定期演奏会」） */
   seasonTitle: string
   /** 本番日 (YYYY-MM-DD) */
   concertDate: string
+  /** 追加のクラス名 */
+  className?: string
 }
 
 export const CountdownBanner: React.FC<CountdownBannerProps> = ({
+  orgName,
+  orgColor,
   seasonTitle,
   concertDate,
+  className = '',
 }) => {
   const today = new Date()
   const concert = new Date(concertDate)
@@ -25,17 +34,32 @@ export const CountdownBanner: React.FC<CountdownBannerProps> = ({
   // 本番日を過ぎていたら非表示
   if (diffDays < 0) return null
 
+  // 背景グラデーションの作成（色が指定されていればそれを使用、なければデフォルトのTint）
+  const baseColor = orgColor || 'rgb(var(--color-tint))'
+  const backgroundStyle = {
+    background: `linear-gradient(135deg, ${baseColor}, ${baseColor}dd, ${baseColor}aa)`,
+  }
+
   return (
     <div
-      className="mx-4 rounded-2xl p-4 text-white shadow-lg"
-      style={{ background: 'linear-gradient(135deg, rgb(var(--color-tint)), #5856D6)' }}
+      className={`rounded-2xl p-4 text-white shadow-lg ${className}`}
+      style={backgroundStyle}
     >
       <div className="flex items-center gap-3">
-        <Calendar className="h-8 w-8 opacity-80 flex-shrink-0" />
+        <Calendar className="h-9 w-9 opacity-80 flex-shrink-0" />
         <div className="flex-1 min-w-0">
-          <p className="text-caption-1 opacity-80 truncate">{seasonTitle}</p>
+          <div className="mb-0.5">
+            {orgName && (
+              <p className="text-caption-1 font-bold opacity-95 truncate leading-tight uppercase tracking-wider">
+                {orgName}
+              </p>
+            )}
+            <p className="text-caption-2 opacity-80 truncate leading-tight">
+              {seasonTitle}
+            </p>
+          </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-title-1 font-bold">あと {diffDays} 日</span>
+            <span className="text-title-1 font-bold tracking-tight">あと {diffDays} 日</span>
             <span className="text-subhead opacity-80">で本番</span>
           </div>
         </div>
