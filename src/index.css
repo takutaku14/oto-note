@@ -1,0 +1,115 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+ * グローバルCSS — Apple HIG準拠 (DESIGN_RULE §2.2 + §3.2)
+ * iOS Safari のWeb特有挙動を排除し、ネイティブアプリの基盤を構築
+ * ============================================================ */
+
+@layer base {
+  :root {
+    /* iOSオーバースクロール（バウンス）時の背景色をシステムに合わせる */
+    background-color: rgb(var(--color-system-grouped-background));
+
+    /* ========================================
+     * セマンティックカラー — Light Mode
+     * ======================================== */
+
+    /* Background Colors — RGB チャンネル形式（Tailwindの透明度修飾子対応） */
+    --color-system-background: 255 255 255;                     /* #FFFFFF */
+    --color-secondary-system-background: 242 242 247;           /* #F2F2F7 */
+    --color-tertiary-system-background: 255 255 255;            /* #FFFFFF */
+    --color-system-grouped-background: 242 242 247;             /* #F2F2F7 */
+    --color-secondary-system-grouped-background: 255 255 255;   /* #FFFFFF */
+    --color-tertiary-system-grouped-background: 242 242 247;    /* #F2F2F7 */
+
+    /* Label Colors — 完全な色値（内蔵の透明度を維持） */
+    --color-label: #000000;
+    --color-secondary-label: rgba(60, 60, 67, 0.6);
+    --color-tertiary-label: rgba(60, 60, 67, 0.3);
+    --color-quaternary-label: rgba(60, 60, 67, 0.18);
+
+    /* Separators & Fills */
+    --color-separator: rgba(60, 60, 67, 0.29);
+    --color-opaque-separator: #C6C6C8;
+    --color-system-fill: rgba(120, 120, 128, 0.2);
+
+    /* Tint Color — RGB チャンネル形式 */
+    --color-tint: 0 122 255;  /* #007AFF */
+  }
+
+  /* ========================================
+   * セマンティックカラー — Dark Mode
+   * ======================================== */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      /* Background Colors */
+      --color-system-background: 0 0 0;                          /* #000000 */
+      --color-secondary-system-background: 28 28 30;             /* #1C1C1E */
+      --color-tertiary-system-background: 44 44 46;              /* #2C2C2E */
+      --color-system-grouped-background: 0 0 0;                  /* #000000 */
+      --color-secondary-system-grouped-background: 28 28 30;     /* #1C1C1E */
+      --color-tertiary-system-grouped-background: 44 44 46;      /* #2C2C2E */
+
+      /* Label Colors */
+      --color-label: #FFFFFF;
+      --color-secondary-label: rgba(235, 235, 245, 0.6);
+      --color-tertiary-label: rgba(235, 235, 245, 0.3);
+      --color-quaternary-label: rgba(235, 235, 245, 0.18);
+
+      /* Separators & Fills */
+      --color-separator: rgba(84, 84, 88, 0.6);
+      --color-opaque-separator: #38383A;
+      --color-system-fill: rgba(120, 120, 128, 0.36);
+
+      /* Tint Color */
+      --color-tint: 10 132 255;  /* #0A84FF */
+    }
+  }
+
+  /* ========================================
+   * iOS Safari Web特有挙動の排除
+   * ======================================== */
+
+  html, body {
+    /* Pull-to-refreshとオーバースクロール（バウンス）のスクロールチェーンを無効化 */
+    overscroll-behavior: none;
+    /* アドレスバーの伸縮を防ぐ動的ビューポート高さ */
+    height: 100dvh;
+    width: 100vw;
+    overflow: hidden;
+  }
+
+  body {
+    /* ハーフモーダルのスケールダウン効果の背景色 (DESIGN_RULE §4.4) */
+    /* app-rootが画面全体を覆うため通常時は不可視 */
+    background-color: #000000;
+    /* テキスト選択を無効化（アプリ的挙動） */
+    -webkit-user-select: none;
+    user-select: none;
+    /* タップ時のグレーハイライトを消去 */
+    -webkit-tap-highlight-color: transparent;
+    /* 長押し時のコンテキストメニュー（虫眼鏡・共有）を無効化 */
+    -webkit-touch-callout: none;
+    /* Apple システムフォントの強制とアンチエイリアス最適化 */
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* テキスト色のデフォルト */
+    color: var(--color-label);
+  }
+
+  /* 入力フォームではテキスト選択とシステムコールアウトを許可 */
+  input, textarea, [contenteditable="true"] {
+    -webkit-user-select: auto;
+    user-select: auto;
+    -webkit-touch-callout: default;
+  }
+
+  /* Reactマウントポイント — ビューポート全体を占有 */
+  #root {
+    height: 100%;
+    width: 100%;
+  }
+}
