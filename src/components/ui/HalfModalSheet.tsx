@@ -17,6 +17,7 @@ import {
   useMotionValue,
   useTransform,
   useMotionValueEvent,
+  animate,
 } from 'framer-motion'
 import type { ReactNode } from 'react'
 
@@ -100,12 +101,20 @@ export const HalfModalSheet: React.FC<HalfModalSheetProps> = ({
             transition={{ type: 'spring', stiffness: 300, damping: 30, mass: 1 }}
             drag="y"
             dragConstraints={{ top: 0 }}
-            dragElastic={0.05}
+            dragElastic={0.1} // 指の動きに遊びを持たせる
             style={{ y }}
             onDragEnd={(_e, { offset, velocity }) => {
               // スワイプの速度 or 移動距離で閉じるか判定
-              if (offset.y > windowHeight * 0.3 || velocity.y > 400) {
+              if (offset.y > windowHeight * 0.25 || velocity.y > 400) {
                 onClose()
+              } else {
+                // 閉じない場合は吸い付くように元の位置(y=0)へ戻る
+                animate(y, 0, {
+                  type: 'spring',
+                  stiffness: 300,
+                  damping: 36, // 少しだけしっとりと戻るように調整
+                  mass: 0.8
+                })
               }
             }}
             className="fixed bottom-0 left-0 right-0 z-50 h-[90dvh] w-full rounded-t-[32px] bg-background shadow-2xl flex flex-col pb-[env(safe-area-inset-bottom)]"

@@ -3,6 +3,7 @@
  * 特定団体のイベント一覧、シーズン切り替え、カウントダウン
  */
 
+import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Bell, Plus, Settings } from 'lucide-react'
 import { useCurrentOrg } from '../../hooks/useCurrentOrg'
@@ -15,6 +16,7 @@ import { SeasonSwitcher } from '../../components/ui/SeasonSwitcher'
 import { VerticalTimeline } from '../../components/ui/timeline/VerticalTimeline'
 import { TimelineBlock } from '../../components/ui/timeline/TimelineBlock'
 import { EVENT_CATEGORY_META, getEventDirection } from '../../constants/eventCategories'
+import { SegmentedControl } from '../../components/ui/SegmentedControl'
 import type { AppEvent } from '../../types'
 
 /** タイムラインの横に表示する日付・時刻を取得 */
@@ -41,6 +43,18 @@ export const OrgDashboardPage: React.FC = () => {
   const { upcomingEvents, pastEvents, getMyResponse } = useEvents()
   const { unreadCount } = useNotifications()
   const navigate = useNavigate()
+  const [timelineFilter, setTimelineFilter] = useState<'all' | 'left' | 'right'>('all')
+
+  // フィルタ適用後のイベントリスト
+  const filteredUpcoming = useMemo(() => {
+    if (timelineFilter === 'all') return upcomingEvents
+    return upcomingEvents.filter(e => getEventDirection(e.category) === timelineFilter)
+  }, [upcomingEvents, timelineFilter])
+
+  const filteredPast = useMemo(() => {
+    if (timelineFilter === 'all') return pastEvents
+    return pastEvents.filter(e => getEventDirection(e.category) === timelineFilter)
+  }, [pastEvents, timelineFilter])
 
   return (
     <div className="min-h-full bg-background-grouped pb-[env(safe-area-inset-bottom)]">
@@ -82,33 +96,53 @@ export const OrgDashboardPage: React.FC = () => {
 
       {/* カウントダウンバナー */}
       {season?.concertDate && (
-        <div className="pt-4">
-          <CountdownBanner seasonTitle={season.title} concertDate={season.concertDate} />
+        <div className="pt-4 px-4">
+          <div className="max-w-2xl mx-auto">
+            <CountdownBanner
+              orgName={org.name}
+              orgColor={org.color}
+              seasonTitle={season.title}
+              concertDate={season.concertDate}
+            />
+          </div>
         </div>
       )}
 
       {/* 今後のイベント */}
-      {upcomingEvents.length === 0 && pastEvents.length === 0 ? (
+      {filteredUpcoming.length === 0 && filteredPast.length === 0 ? (
         <EmptyState
-          title="まだイベントがありません"
+          title={timelineFilter === 'all' ? "まだイベントがありません" : "該当するイベントがありません"}
           description={isAdmin ? '「＋」ボタンから新しいイベントを作成しましょう' : '幹部がイベントを作成するとここに表示されます'}
-          action={isAdmin ? { label: 'イベントを作成', onClick: () => navigate(`/org/${org.id}/admin/events/new`) } : undefined}
+          action={isAdmin && timelineFilter === 'all' ? { label: 'イベントを作成', onClick: () => navigate(`/org/${org.id}/admin/events/new`) } : undefined}
         />
       ) : (
         <div className="pt-4">
+          {/* スマホ用カテゴリフィルタ (md未満で表示) */}
+          <div className="md:hidden px-4 mb-6">
+            <SegmentedControl
+              options={[
+                { label: 'すべて', value: 'all' },
+                { label: '練習予定', value: 'left' },
+                { label: 'やること', value: 'right' },
+              ] as const}
+              value={timelineFilter}
+              onChange={(value) => setTimelineFilter(value as typeof timelineFilter)}
+            />
+          </div>
+
           <VerticalTimeline>
             {/* 今後の予定 */}
-            {upcomingEvents.length > 0 && (
+            {filteredUpcoming.length > 0 && (
               <>
                 <div className="relative flex items-center md:justify-center z-10 mb-6 pl-2 md:pl-0">
                   <div className="absolute inset-0 flex items-center justify-center -z-10">
                     <div className="w-full h-full bg-background-grouped" />
                   </div>
                   <span className="bg-tint/10 text-tint px-4 py-1.5 rounded-full text-caption-1 font-bold shadow-sm">
-                    今後の予定（{upcomingEvents.length}件）
+                    今後の予定（{filteredUpcoming.length}件）
                   </span>
                 </div>
-                {upcomingEvents.map((event) => {
+                {filteredUpcoming.map((event) => {
                   const meta = EVENT_CATEGORY_META[event.category]
                   const response = getMyResponse(event.id)
                   return (
@@ -131,17 +165,17 @@ export const OrgDashboardPage: React.FC = () => {
             )}
 
             {/* 過去のイベント */}
-            {pastEvents.length > 0 && (
+            {filteredPast.length > 0 && (
               <>
                 <div className="relative flex items-center md:justify-center z-10 mb-6 pl-2 md:pl-0 mt-8">
                   <div className="absolute inset-0 flex items-center justify-center -z-10">
                     <div className="w-full h-full bg-background-grouped" />
                   </div>
                   <span className="bg-fill px-4 py-1.5 rounded-full text-caption-1 font-bold text-label-secondary shadow-sm">
-                    過去のイベント（{pastEvents.length}件）
+                    過去のイベント（{filteredPast.length}件）
                   </span>
                 </div>
-                {pastEvents.map((event) => {
+                {filteredPast.map((event) => {
                   const meta = EVENT_CATEGORY_META[event.category]
                   const response = getMyResponse(event.id)
                   return (

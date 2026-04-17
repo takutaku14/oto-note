@@ -18,6 +18,7 @@ import { EmptyState } from '../../components/ui/EmptyState'
 import { VerticalTimeline } from '../../components/ui/timeline/VerticalTimeline'
 import { TimelineBlock } from '../../components/ui/timeline/TimelineBlock'
 import { EVENT_CATEGORY_META, getEventDirection } from '../../constants/eventCategories'
+import { SegmentedControl } from '../../components/ui/SegmentedControl'
 import type { AppEvent } from '../../types'
 
 /** タイムラインの横に表示する日付・時刻を取得 */
@@ -66,6 +67,7 @@ export const HomePage: React.FC = () => {
   const data = useMockData()
   const navigate = useNavigate()
   const [showUnansweredOnly, setShowUnansweredOnly] = useState(false)
+  const [timelineFilter, setTimelineFilter] = useState<'all' | 'left' | 'right'>('all')
 
   // 全団体の本番日のカウントダウンを集計
   const upcomingConcerts = useMemo(() => {
@@ -102,16 +104,34 @@ export const HomePage: React.FC = () => {
 
   // フィルタ適用後のグルーピング
   const filteredGrouped = useMemo(() => {
-    if (!showUnansweredOnly) return groupedByDate
-    const filtered: Record<string, typeof timelineEvents> = {}
-    for (const [date, events] of Object.entries(groupedByDate)) {
-      const unanswered = events.filter(
-        (te) => !te.myResponse || te.myResponse.status === 'unanswered' || te.myResponse.status === 'unpaid'
-      )
-      if (unanswered.length > 0) filtered[date] = unanswered
+    let result = groupedByDate
+
+    // 未回答フィルタ
+    if (showUnansweredOnly) {
+      const filtered: Record<string, typeof timelineEvents> = {}
+      for (const [date, events] of Object.entries(result)) {
+        const unanswered = events.filter(
+          (te) => !te.myResponse || te.myResponse.status === 'unanswered' || te.myResponse.status === 'unpaid'
+        )
+        if (unanswered.length > 0) filtered[date] = unanswered
+      }
+      result = filtered
     }
-    return filtered
-  }, [groupedByDate, showUnansweredOnly, timelineEvents])
+
+    // カテゴリフィルタ（練習予定 / やること）
+    if (timelineFilter !== 'all') {
+      const filtered: Record<string, typeof timelineEvents> = {}
+      for (const [date, events] of Object.entries(result)) {
+        const matching = events.filter(
+          (te) => getEventDirection(te.event.category) === timelineFilter
+        )
+        if (matching.length > 0) filtered[date] = matching
+      }
+      result = filtered
+    }
+
+    return result
+  }, [groupedByDate, showUnansweredOnly, timelineFilter, timelineEvents])
 
   const dateKeys = Object.keys(filteredGrouped).sort()
 
@@ -178,6 +198,19 @@ export const HomePage: React.FC = () => {
         />
       ) : (
         <div className="pt-4">
+          {/* スマホ用カテゴリフィルタ (md未満で表示) */}
+          <div className="md:hidden px-4 mb-6">
+            <SegmentedControl
+              options={[
+                { label: 'すべて', value: 'all' },
+                { label: '練習予定', value: 'left' },
+                { label: 'やること', value: 'right' },
+              ] as const}
+              value={timelineFilter}
+              onChange={(value) => setTimelineFilter(value as typeof timelineFilter)}
+            />
+          </div>
+
           <VerticalTimeline>
             {dateKeys.map((dateKey) => (
               <div key={dateKey}>

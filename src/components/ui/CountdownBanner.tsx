@@ -5,6 +5,7 @@
  */
 
 import { Calendar } from 'lucide-react'
+import { getContrastColor } from '../../utils/color'
 
 type CountdownBannerProps = {
   /** 団体名 */
@@ -40,27 +41,32 @@ export const CountdownBanner: React.FC<CountdownBannerProps> = ({
     background: `linear-gradient(135deg, ${baseColor}, ${baseColor}dd, ${baseColor}aa)`,
   }
 
+  const contrast = getContrastColor(orgColor)
+  const textColor = contrast === 'black' ? 'text-[#1C1C1E]' : 'text-white'
+  const subTextOpacity = contrast === 'black' ? 'opacity-70' : 'opacity-80'
+  const iconOpacity = contrast === 'black' ? 'opacity-60' : 'opacity-80'
+
   return (
     <div
-      className={`rounded-2xl p-4 text-white shadow-lg ${className}`}
+      className={`rounded-2xl p-4 shadow-lg ${textColor} ${className}`}
       style={backgroundStyle}
     >
       <div className="flex items-center gap-3">
-        <Calendar className="h-9 w-9 opacity-80 flex-shrink-0" />
+        <Calendar className={`h-9 w-9 ${iconOpacity} flex-shrink-0`} />
         <div className="flex-1 min-w-0">
           <div className="mb-0.5">
             {orgName && (
-              <p className="text-caption-1 font-bold opacity-95 truncate leading-tight uppercase tracking-wider">
+              <p className="text-caption-1 font-bold opacity-90 truncate leading-tight uppercase tracking-wider">
                 {orgName}
               </p>
             )}
-            <p className="text-caption-2 opacity-80 truncate leading-tight">
+            <p className={`text-caption-2 ${subTextOpacity} truncate leading-tight`}>
               {seasonTitle}
             </p>
           </div>
           <div className="flex items-baseline gap-2">
             <span className="text-title-1 font-bold tracking-tight">あと {diffDays} 日</span>
-            <span className="text-subhead opacity-80">で本番</span>
+            <span className={`text-subhead ${subTextOpacity}`}>で本番</span>
           </div>
         </div>
       </div>
