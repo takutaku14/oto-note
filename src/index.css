@@ -75,8 +75,8 @@
   html, body {
     /* Pull-to-refreshとオーバースクロール（バウンス）のスクロールチェーンを無効化 */
     overscroll-behavior: none;
-    /* アドレスバーの伸縮を防ぐ動的ビューポート高さ */
-    height: 100dvh;
+    /* PWA環境でのアドレスバー計算バグ(100dvh)を回避するため100%を指定 */
+    height: 100%;
     width: 100vw;
     overflow: hidden;
   }

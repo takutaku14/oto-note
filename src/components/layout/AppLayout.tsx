@@ -36,7 +36,7 @@ export const AppLayout: React.FC = () => {
   }
 
   return (
-    <div id="app-root" className="flex h-full w-full overflow-hidden bg-background">
+    <div id="app-root" className="flex absolute inset-0 w-full overflow-hidden bg-background">
 
       {/* ========================================
        * デスクトップ / iPad サイドバー (md以上で表示)

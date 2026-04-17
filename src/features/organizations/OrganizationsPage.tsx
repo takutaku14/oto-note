@@ -17,7 +17,6 @@ export const OrganizationsPage: React.FC = () => {
 
   return (
     <div
-      id="app-root"
       className="min-h-full bg-background-grouped pb-[env(safe-area-inset-bottom)]"
     >
       {/* ナビゲーションバー風ヘッダー */}
