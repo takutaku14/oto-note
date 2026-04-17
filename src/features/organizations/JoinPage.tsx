@@ -108,8 +108,8 @@ export const JoinPage: React.FC = () => {
   // 参加フォーム
   return (
     <div className="min-h-dvh bg-background">
-      {/* ヒーローセクション (iOS/PWAのSafe Area Topを確保) */}
-      <div className="flex flex-col items-center pt-[calc(env(safe-area-inset-top)+4rem)] pb-8 px-8">
+      {/* ヒーローセクション */}
+      <div className="flex flex-col items-center pt-16 pb-8 px-8">
         <div
           className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg mb-4"
           style={{ backgroundColor: org.color || 'rgb(var(--color-tint))' }}

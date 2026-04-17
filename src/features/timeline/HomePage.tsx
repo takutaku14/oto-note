@@ -117,8 +117,8 @@ export const HomePage: React.FC = () => {
 
   return (
     <div className="min-h-full bg-background-grouped pb-[env(safe-area-inset-bottom)]">
-      {/* ヘッダー (iOS/PWAのSafe Area Topを確保) */}
-      <div className="sticky top-0 z-40 bg-background-grouped/80 backdrop-blur-xl border-b border-separator pt-[env(safe-area-inset-top)]">
+      {/* ヘッダー */}
+      <div className="sticky top-0 z-40 bg-background-grouped/80 backdrop-blur-xl border-b border-separator">
         <div className="flex items-center justify-between px-4 py-3">
           <div>
             <p className="text-subhead text-label-secondary">おかえりなさい</p>

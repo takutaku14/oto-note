@@ -72,10 +72,15 @@
    * iOS Safari Web特有挙動の排除
    * ======================================== */
 
+  html {
+    /* iOS PWA standalone モードでステータスバー領域に色を染み出させるための設定 */
+    background-color: rgb(var(--color-system-grouped-background));
+  }
+
   html, body {
     /* Pull-to-refreshとオーバースクロール（バウンス）のスクロールチェーンを無効化 */
     overscroll-behavior: none;
-    /* 古い環境向けに100%、モダンなPWA環境向けに物理画面高に追従する100dvhを指定 */
+    /* 物理画面高に追従する設定 */
     height: 100%;
     height: 100dvh;
     width: 100vw;
@@ -83,6 +88,8 @@
   }
 
   body {
+    /* iOSオーバースクロール（バウンス）時の背景色をシステムに合わせる */
+    background-color: rgb(var(--color-system-grouped-background));
     /* ハーフモーダルのスケールダウン効果の背景色 (DESIGN_RULE §4.4) */
     /* app-rootが画面全体を覆うため通常時は不可視 */
     background-color: #000000;

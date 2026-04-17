@@ -20,8 +20,8 @@ export const LoginPage: React.FC = () => {
 
   return (
     <div className="min-h-dvh flex flex-col bg-background">
-      {/* ヒーローセクション (iOS/PWAのSafe Area Topを確保) */}
-      <div className="flex-1 flex flex-col items-center justify-center px-8 pt-[calc(env(safe-area-inset-top)+4rem)] pb-8">
+      {/* ヒーローセクション */}
+      <div className="flex-1 flex flex-col items-center justify-center px-8 pt-16 pb-8">
         {/* アプリロゴ */}
         <div
           className="w-20 h-20 rounded-[22px] flex items-center justify-center shadow-lg mb-6"
