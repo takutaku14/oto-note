@@ -35,8 +35,8 @@ export const AppLayout: React.FC = () => {
     return location.pathname.startsWith(path)
   }
 
+  // fixed inset-0: ビューポートに直接貼り付け、親の高さチェーンに依存しない堅牢なレイアウト
   return (
-    {/* fixed inset-0: ビューポートに直接貼り付け、親の高さチェーンに依存しない堅牢なレイアウト */}
     <div id="app-root" className="flex fixed inset-0 w-full overflow-hidden bg-background">
 
       {/* ========================================
