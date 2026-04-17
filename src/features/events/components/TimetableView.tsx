@@ -4,10 +4,9 @@ import type { TimetableEntry } from '../../../types'
 
 type TimetableViewProps = {
   timetable: TimetableEntry[]
-  date?: string
 }
 
-export const TimetableView: React.FC<TimetableViewProps> = ({ timetable, date }) => {
+export const TimetableView: React.FC<TimetableViewProps> = ({ timetable }) => {
   if (!timetable || timetable.length === 0) return null
 
   return (

@@ -16,7 +16,7 @@ export const EventDetailBody: React.FC<EventDetailBodyProps> = ({ event }) => {
           <CalendarExportButton event={event} />
           <div>
             <h3 className="text-title-3 font-bold text-label mb-4">タイムテーブル</h3>
-            <TimetableView timetable={event.timetable} date={event.date} />
+            <TimetableView timetable={event.timetable} />
           </div>
         </div>
       )
@@ -32,7 +32,7 @@ export const EventDetailBody: React.FC<EventDetailBodyProps> = ({ event }) => {
           <CalendarExportButton event={event} />
           <div>
             <h3 className="text-title-3 font-bold text-label mb-4">タイムテーブル</h3>
-            <TimetableView timetable={event.timetable} date={event.date} />
+            <TimetableView timetable={event.timetable} />
           </div>
         </div>
       )
