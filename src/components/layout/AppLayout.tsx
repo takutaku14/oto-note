@@ -1,6 +1,7 @@
 import { Outlet, Link, useLocation } from 'react-router-dom'
 import { Home, Building2, Bell, User, Music } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { PageTransition } from './PageTransition'
 
 /**
  * ナビゲーション項目の定義
@@ -31,8 +32,18 @@ export const AppLayout: React.FC = () => {
 
   /** 現在のパスがナビ項目にマッチするか判定 */
   const isActive = (path: string) => {
-    if (path === '/') return location.pathname === '/'
-    return location.pathname.startsWith(path)
+    const currentPath = location.pathname
+
+    // ホームは厳密一致
+    if (path === '/') return currentPath === '/'
+
+    // 団体カテゴリ: 一覧(/organizations) または 詳細スコープ(/org/) の場合にアクティブとする
+    if (path === '/organizations') {
+      return currentPath.startsWith('/organizations') || currentPath.startsWith('/org/')
+    }
+
+    // その他は前方一致 (サブページを含む)
+    return currentPath.startsWith(path)
   }
 
   // fixed inset-0: ビューポートに直接貼り付け、親の高さチェーンに依存しない堅牢なレイアウト
@@ -73,10 +84,13 @@ export const AppLayout: React.FC = () => {
 
       {/* ========================================
        * メインコンテンツエリア
-       * モバイルではボトムタブ分の余白を下部に確保
+       * PageTransition でラップしてアニメーションを適用
+       * モバイルではタブバーに重ならないよう下部にマージンを確保
        * ======================================== */}
-      <main className="flex-1 relative overflow-y-auto overscroll-y-contain pb-[calc(env(safe-area-inset-bottom)+60px)] md:pb-0">
-        <Outlet />
+      <main className="flex-1 relative overflow-hidden mb-[calc(60px+env(safe-area-inset-bottom))] md:mb-0">
+        <PageTransition>
+          <Outlet />
+        </PageTransition>
       </main>
 
       {/* ========================================

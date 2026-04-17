@@ -59,9 +59,12 @@ export type MockDataContextValue = {
 
   /* ====== イベント操作 ====== */
   addEvent: (event: AppEvent) => void
+  updateEvent: (eventId: string, updates: Partial<AppEvent>) => void
+  deleteEvent: (eventId: string) => void
 
   /* ====== レスポンス操作 ====== */
   updateResponse: (eventId: string, userId: string, updates: Partial<EventResponse>) => void
+  upsertResponse: (response: EventResponse) => void
 
   /* ====== 通知操作 ====== */
   markNotificationRead: (notifId: string) => void
@@ -155,6 +158,18 @@ export const MockDataProvider: React.FC<{ children: ReactNode }> = ({ children }
     setEvents((prev) => [...prev, event])
   }, [])
 
+  const updateEvent = useCallback((eventId: string, updates: Partial<AppEvent>) => {
+    setEvents((prev) =>
+      prev.map((e) => (e.id === eventId ? { ...e, ...updates } as AppEvent : e))
+    )
+  }, [])
+
+  const deleteEvent = useCallback((eventId: string) => {
+    setEvents((prev) => prev.filter((e) => e.id !== eventId))
+    // イベント削除時に関連するレスポンスも削除
+    setResponses((prev) => prev.filter((r) => r.eventId !== eventId))
+  }, [])
+
   /* ====== レスポンス操作 ====== */
   const updateResponse = useCallback((eventId: string, userId: string, updates: Partial<EventResponse>) => {
     setResponses((prev) =>
@@ -162,6 +177,18 @@ export const MockDataProvider: React.FC<{ children: ReactNode }> = ({ children }
         r.eventId === eventId && r.userId === userId ? { ...r, ...updates } : r
       )
     )
+  }, [])
+
+  const upsertResponse = useCallback((response: EventResponse) => {
+    setResponses((prev) => {
+      const exists = prev.some((r) => r.eventId === response.eventId && r.userId === response.userId)
+      if (exists) {
+        return prev.map((r) =>
+          r.eventId === response.eventId && r.userId === response.userId ? { ...r, ...response } : r
+        )
+      }
+      return [...prev, response]
+    })
   }, [])
 
   /* ====== 通知操作 ====== */
@@ -189,8 +216,8 @@ export const MockDataProvider: React.FC<{ children: ReactNode }> = ({ children }
     addOrganization, updateOrganization,
     addSeason,
     addMembership, updateMembership,
-    addEvent,
-    updateResponse,
+    addEvent, updateEvent, deleteEvent,
+    updateResponse, upsertResponse,
     markNotificationRead,
     resetAllData,
   }

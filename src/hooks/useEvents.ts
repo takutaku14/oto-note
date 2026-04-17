@@ -78,6 +78,13 @@ export const useEvents = () => {
     [data.responses, currentUser]
   )
 
+  /** イベントに対するすべての回答を取得 */
+  const getResponsesForEvent = useCallback(
+    (eventId: string): EventResponse[] =>
+      data.responses.filter((r) => r.eventId === eventId),
+    [data.responses]
+  )
+
   return {
     events,
     myEvents,
@@ -85,5 +92,9 @@ export const useEvents = () => {
     pastEvents,
     getEventById,
     getMyResponse,
+    getResponsesForEvent,
+    updateEvent: data.updateEvent,
+    deleteEvent: data.deleteEvent,
+    upsertResponse: data.upsertResponse,
   }
 }

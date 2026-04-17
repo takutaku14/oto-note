@@ -21,30 +21,13 @@ import { OrgDashboardPage } from './features/organizations/OrgDashboardPage'
 import { EventCreatePage } from './features/events/EventCreatePage'
 import { NotificationsPage } from './features/notifications/NotificationsPage'
 
-// データリセット用の一時ページ
-import { useMockData } from './hooks/useMockData'
-import { useNavigate } from 'react-router-dom'
-const DevMyPage = () => {
-  const { resetAllData } = useMockData()
-  const navigate = useNavigate()
-  return (
-    <div className="p-8 space-y-4">
-      <h1 className="text-title-2 font-bold mb-4">マイページ（開発中）</h1>
-      <button
-        onClick={() => {
-          resetAllData()
-          navigate('/')
-        }}
-        className="px-4 py-2 bg-red-500 text-white rounded-lg font-bold w-full"
-      >
-        モックデータをリセット (localStorage消去)
-      </button>
-      <p className="text-caption-1 text-label-secondary">
-        ※作成したイベント等が消去され、初期のモックデータに戻ります。
-      </p>
-    </div>
-  )
-}
+// Phase 3 Pages
+import { EventDetailPage } from './features/events/EventDetailPage'
+import { EventEditPage } from './features/events/EventEditPage'
+import { EventResponsesPage } from './features/events/EventResponsesPage'
+
+// Phase 4/Current Pages
+import { MyPage } from './features/mypage/MyPage'
 
 /**
  * アプリケーションのルート定義
@@ -74,8 +57,8 @@ function App() {
           {/* 通知センター */}
           <Route path="notifications" element={<NotificationsPage />} />
 
-          {/* マイページ（開発用リセットUI等） */}
-          <Route path="mypage" element={<DevMyPage />} />
+          {/* マイページ（プロフィール、ログアウト等） */}
+          <Route path="mypage" element={<MyPage />} />
 
           {/* ============================
            * 団体スコープルート（OrgGuard）
@@ -89,7 +72,7 @@ function App() {
             <Route path="members" element={<MemberListPage />} />
 
             {/* イベント詳細（Phase 3 で実装） */}
-            <Route path="events/:eventId" element={<PlaceholderPage title="イベント詳細" />} />
+            <Route path="events/:eventId" element={<EventDetailPage />} />
 
             {/* 掲示板（Phase 5 で実装） */}
             <Route path="boards" element={<PlaceholderPage title="掲示板" subtitle="カテゴリ別スレッド一覧" />} />
@@ -108,8 +91,11 @@ function App() {
               {/* イベント作成 */}
               <Route path="events/new" element={<EventCreatePage />} />
 
+              {/* イベント編集 */}
+              <Route path="events/:eventId/edit" element={<EventEditPage />} />
+
               {/* 回答一覧・管理ビュー（Phase 3 で実装） */}
-              <Route path="events/:eventId/responses" element={<PlaceholderPage title="回答一覧" subtitle="管理者ビュー" />} />
+              <Route path="events/:eventId/responses" element={<EventResponsesPage />} />
             </Route>
           </Route>
         </Route>
